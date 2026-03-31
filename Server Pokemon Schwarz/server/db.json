@@ -1,0 +1,318 @@
+{
+  "players": [
+    {
+      "name": "Player 1",
+      "color": "red",
+      "team": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "badges": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "deaths": 0,
+      "mainStream": "",
+      "touchStream": "",
+      "taken": false,
+      "catches": {},
+      "mainAdj": {
+        "left": 0,
+        "top": 0,
+        "w": 100,
+        "h": 100
+      },
+      "touchAdj": {
+        "left": 0,
+        "top": 0,
+        "w": 100,
+        "h": 100
+      }
+    },
+    {
+      "name": "Jasmin",
+      "color": "blue",
+      "team": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "badges": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "deaths": 0,
+      "mainStream": "",
+      "touchStream": "",
+      "taken": false,
+      "catches": {},
+      "mainAdj": {
+        "left": 0,
+        "top": 0,
+        "w": 100,
+        "h": 100
+      },
+      "touchAdj": {
+        "left": 0,
+        "top": 0,
+        "w": 100,
+        "h": 100
+      }
+    },
+    {
+      "name": "Player 3",
+      "color": "green",
+      "team": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "badges": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "deaths": 0,
+      "mainStream": "",
+      "touchStream": "",
+      "taken": false,
+      "catches": {},
+      "mainAdj": {
+        "left": 0,
+        "top": 0,
+        "w": 100,
+        "h": 100
+      },
+      "touchAdj": {
+        "left": 0,
+        "top": 0,
+        "w": 100,
+        "h": 100
+      }
+    },
+    {
+      "name": "Player 4",
+      "color": "purple",
+      "team": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "badges": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "deaths": 0,
+      "mainStream": "",
+      "touchStream": "",
+      "taken": false,
+      "catches": {},
+      "mainAdj": {
+        "left": 0,
+        "top": 0,
+        "w": 100,
+        "h": 100
+      },
+      "touchAdj": {
+        "left": 0,
+        "top": 0,
+        "w": 100,
+        "h": 100
+      }
+    },
+    {
+      "name": "Player 5",
+      "color": "orange",
+      "team": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "badges": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "deaths": 0,
+      "mainStream": "",
+      "touchStream": "",
+      "taken": false,
+      "catches": {},
+      "mainAdj": {
+        "left": 0,
+        "top": 0,
+        "w": 100,
+        "h": 100
+      },
+      "touchAdj": {
+        "left": 0,
+        "top": 0,
+        "w": 100,
+        "h": 100
+      }
+    },
+    {
+      "name": "Player 6",
+      "color": "cyan",
+      "team": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "badges": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "deaths": 0,
+      "mainStream": "",
+      "touchStream": "",
+      "taken": false,
+      "catches": {},
+      "mainAdj": {
+        "left": 0,
+        "top": 0,
+        "w": 100,
+        "h": 100
+      },
+      "touchAdj": {
+        "left": 0,
+        "top": 0,
+        "w": 100,
+        "h": 100
+      }
+    },
+    {
+      "name": "Player 7",
+      "color": "pink",
+      "team": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "badges": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "deaths": 0,
+      "mainStream": "",
+      "touchStream": "",
+      "taken": false,
+      "catches": {},
+      "mainAdj": {
+        "left": 0,
+        "top": 0,
+        "w": 100,
+        "h": 100
+      },
+      "touchAdj": {
+        "left": 0,
+        "top": 0,
+        "w": 100,
+        "h": 100
+      }
+    },
+    {
+      "name": "Player 8",
+      "color": "yellow",
+      "team": [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ],
+      "badges": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false
+      ],
+      "deaths": 0,
+      "mainStream": "",
+      "touchStream": "",
+      "taken": false,
+      "catches": {},
+      "mainAdj": {
+        "left": 0,
+        "top": 0,
+        "w": 100,
+        "h": 100
+      },
+      "touchAdj": {
+        "left": 0,
+        "top": 0,
+        "w": 100,
+        "h": 100
+      }
+    }
+  ],
+  "graveyard": [],
+  "game": "Schwarz"
+}

@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Nuzlocke Overlay</title>
+<link rel="stylesheet" href="/css/style.css">
+<style>
+.header { background:#1f4e78; color:white; padding:8px; text-align:center; }
+table { border-collapse:collapse; width:100%; }
+td,th { border:1px solid #999; padding:4px; background:#e6e6e6; text-align:center; }
+.route { text-align:left; background:#d9d9d9; }
+.alive   { background:#b6d7a8 !important; }
+.dead    { background:#ea9999 !important; }
+.blocked { background:#bfbfbf !important; }
+select { width:100%; border:none; background:transparent; }
+
+#tracker { color:white; }
+#tracker table { background:transparent !important; }
+#tracker td, #tracker th { background:#2a2a2a; color:white; border:1px solid #444; }
+#tracker td.alive   { background:#b6d7a8 !important; }
+#tracker td.dead    { background:#ea9999 !important; }
+#tracker td.blocked { background:#bfbfbf !important; }
+#tracker .route     { background:#333; }
+#tracker select, #tracker input { background:#1a1a1a; color:white; border:none; }
+</style>
+</head>
+<body>
+
+<div id="login">
+  <h2>Login</h2>
+  <input id="username" placeholder="Name"><br><br>
+  <input id="password" type="password" placeholder="Passwort"><br><br>
+  <button onclick="login()">Login</button>
+</div>
+
+<div id="overlay" style="display:none"></div>
+
+<div id="graveyard-section" style="display:none">
+<h2>&#x26B0; Friedhof</h2>
+<div id="graveyard"></div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="/js/app.js"></script>
+
+<div id="adjContextMenu" style="display:none;position:fixed;background:#1e1e1e;color:#eee;border:1px solid #444;border-radius:6px;padding:4px 0;z-index:299999;min-width:180px;box-shadow:0 4px 12px rgba(0,0,0,0.6);">
+  <div onclick="menuFullSize()" style="padding:10px 16px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:8px;">&#x26F6; Full Screen</div>
+  <div onclick="menuToggleMove()" id="menuMoveBtn" style="padding:10px 16px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:8px;">&#x2194; Bild bewegen / Zoom</div>
+  <div onclick="menuDisconnect()" style="padding:10px 16px;cursor:pointer;font-size:13px;display:flex;align-items:center;gap:8px;">&#x274C; Link trennen</div>
+</div>
+
+<button id="tracker-btn" onclick="toggleTracker()" style="display:none;position:fixed;top:10px;right:70px;z-index:10000;padding:8px 14px;cursor:pointer;">Tracker</button>
+
+<div id="tracker" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.88);z-index:9999;overflow:auto;">
+  <div class="header">Nuzlocke Tracker</div>
+  <div style="padding:8px 12px;background:#1a1a1a;position:sticky;top:0;z-index:100;display:flex;align-items:center;gap:10px;border-bottom:1px solid #444;">
+    <label style="color:white;font-size:14px;font-weight:bold;">Edition:</label>
+    <select id="edition-select" onchange="selectEdition(this.value)" style="padding:5px 10px;background:#333;color:white;border:1px solid #555;border-radius:4px;font-size:14px;">
+      <option value="">-- Edition wählen --</option>
+    </select>
+  </div>
+  <table id="app"></table>
+</div>
+
+<script>
+// =============================================================
+//  TRACKER – liest und schreibt ausschliesslich über gd()
+//  (db, gd, POKEMON_LIST, ALL_ROUTES, statuses, getSpriteUrl,
+//   getAliveForPlayer, syncDB, debouncedSync, updateOverlay,
+//   updateBodyGameClass sind Globals aus app.js)
+// =============================================================
+
+// ── Edition / Routen laden ────────────────────────────────────
+let ROUTES_BY_GAME = {};
+
+fetch('/api/routes').then(r => r.json()).then(data => {
+  ROUTES_BY_GAME = data;
+  const sel = document.getElementById('edition-select');
+  if (sel) {
+    Object.keys(data).forEach(g => {
+      const o = document.createElement('option');
+      o.value = g; o.textContent = g;
+      sel.appendChild(o);
+    });
+  }
+}).catch(() => {});
+
+function selectEdition(edition) {
+  if (!edition || !ROUTES_BY_GAME[edition]) return;
+  ALL_ROUTES = ROUTES_BY_GAME[edition].slice();
+  if (db) {
+    db.game = edition;
+
+    // Edition-Daten anlegen falls noch nicht vorhanden
+    if (!db.games) db.games = {};
+    if (!db.games[edition]) {
+      db.games[edition] = { players: defaultPlayers(), graveyard: [] };
+    }
+
+    updateBodyGameClass();
+    syncDB();
+    buildOverlay();
+    overlayBuilt = true;
+    trackerBuilt = false;
+    buildTrackerTable();
+    trackerBuilt = true;
+
+    // Select aktualisieren
+    const sel = document.getElementById('edition-select');
+    if (sel && sel.value !== edition) sel.value = edition;
+  }
+}
+
+// ── Catch-Eintrag sicher holen / anlegen ─────────────────────
+function getCatch(pIdx, routeName) {
+  const gameData = gd();
+  if (!gameData) return { name: "", status: "" };
+  if (!gameData.players[pIdx].catches[routeName]) {
+    gameData.players[pIdx].catches[routeName] = { name: "", status: "" };
+  }
+  return gameData.players[pIdx].catches[routeName];
+}
+
+// ── Status-Farbe auf TD-Paar anwenden ─────────────────────────
+function applyStatusColor(el) {
+  const tdS = el.parentElement;
+  const tdP = tdS ? tdS.previousElementSibling : null;
+  ["alive","dead","blocked"].forEach(c => {
+    tdS && tdS.classList.remove(c);
+    tdP && tdP.classList.remove(c);
+  });
+  if (el.value === "Lebendig") { tdS && tdS.classList.add("alive");   tdP && tdP.classList.add("alive"); }
+  if (el.value === "Tot")      { tdS && tdS.classList.add("dead");    tdP && tdP.classList.add("dead"); }
+  if (el.value === "Blockiert"){ tdS && tdS.classList.add("blocked"); tdP && tdP.classList.add("blocked"); }
+}
+
+// ── HTML-Escape ───────────────────────────────────────────────
+function escH(s) {
+  return String(s || "").replace(/&/g,"&amp;").replace(/"/g,"&quot;");
+}
+
+// ── Gemeinsames Autocomplete-Dropdown ─────────────────────────
+const DROP = document.createElement("div");
+DROP.style.cssText = "position:fixed;background:#222;color:white;border:1px solid #555;max-height:150px;overflow-y:auto;display:none;z-index:999999;box-shadow:0 2px 6px rgba(0,0,0,.6);min-width:160px;";
+document.body.appendChild(DROP);
+
+let _dropIdx  = -1;
+let _dropPIdx = -1;
+let _dropRi   = -1;
+
+function showDrop(input, pIdx, ri) {
+  const val = input.value.toLowerCase();
+  DROP.innerHTML = "";
+  _dropIdx  = -1;
+  _dropPIdx = pIdx;
+  _dropRi   = ri;
+
+  if (!val) { DROP.style.display = "none"; return; }
+
+  let count = 0;
+  for (const name of POKEMON_LIST) {
+    if (!name || !name.toLowerCase().startsWith(val)) continue;
+    const item = document.createElement("div");
+    item.textContent = name;
+    item.style.cssText = "padding:4px 8px;cursor:pointer;white-space:nowrap;";
+    item.addEventListener("mousedown", e => { e.preventDefault(); commitDrop(name, pIdx, ri); });
+    DROP.appendChild(item);
+    if (++count >= 10) break;
+  }
+
+  if (!count) { DROP.style.display = "none"; return; }
+
+  const rect = input.getBoundingClientRect();
+  DROP.style.left  = rect.left + "px";
+  DROP.style.top   = rect.bottom + "px";
+  DROP.style.width = Math.max(rect.width, 160) + "px";
+  DROP.style.display = "block";
+}
+
+function hideDrop() {
+  DROP.style.display = "none";
+  _dropIdx = -1;
+}
+
+function highlightDrop() {
+  DROP.querySelectorAll("div").forEach((el, i) => {
+    el.style.background = i === _dropIdx ? "#3399ff" : "";
+    el.style.color      = i === _dropIdx ? "white"   : "";
+  });
+}
+
+function commitDrop(name, pIdx, ri) {
+  const r = ALL_ROUTES[ri];
+  if (!r) return;
+  const input = document.getElementById(`inp-p${pIdx}-r${ri}`);
+  if (input) input.value = name;
+  getCatch(pIdx, r).name = name;
+  hideDrop();
+  updateTeamDropdownsForPlayer(pIdx);
+  debouncedSync();
+}
+
+// ── Team-Dropdowns neu befüllen ───────────────────────────────
+function updateTeamDropdownsForPlayer(pIdx) {
+  const gameData = gd();
+  if (!gameData) return;
+  const alive = getAliveForPlayer(pIdx);
+  for (let s = 0; s < 6; s++) {
+    const sel = document.getElementById(`team-p${pIdx}-s${s}`);
+    if (!sel) continue;
+    const cur = gameData.players[pIdx].team[s] || "";
+    sel.innerHTML = `<option value=""></option>${alive.map(n => `<option>${n}</option>`).join("")}`;
+    if (alive.includes(cur)) {
+      sel.value = cur;
+    } else {
+      sel.value = "";
+      if (cur) gameData.players[pIdx].team[s] = null;
+    }
+  }
+}
+
+function updateAllTeamDropdowns() {
+  for (let p = 0; p < 8; p++) updateTeamDropdownsForPlayer(p);
+}
+
+// ── Tracker-Tabelle aufbauen ──────────────────────────────────
+function buildTrackerTable() {
+  const gameData = gd();
+  if (!ALL_ROUTES.length) {
+    document.getElementById("app").innerHTML = '<tr><td colspan="17" style="text-align:center;padding:20px;color:#aaa;">Bitte eine Edition auswählen</td></tr>';
+    return;
+  }
+  if (!gameData) {
+    document.getElementById("app").innerHTML = '<tr><td colspan="17" style="text-align:center;padding:20px;color:#aaa;">Keine Daten für diese Edition</td></tr>';
+    return;
+  }
+
+  let h = "";
+
+  h += `<tr><th></th>`;
+  for (let p = 0; p < 8; p++) h += `<th colspan=2>${escH(gameData.players[p].name)}</th>`;
+  h += `</tr>`;
+
+  for (let s = 0; s < 6; s++) {
+    h += `<tr class="teamRow"><td class="route">Team Slot ${s + 1}</td>`;
+    for (let p = 0; p < 8; p++) {
+      h += `<td colspan=2><select id="team-p${p}-s${s}" class="teamSel" style="width:100%"></select></td>`;
+    }
+    h += `</tr>`;
+  }
+
+  h += `<tr><th>Route</th>`;
+  for (let p = 0; p < 8; p++) h += `<th colspan=2>${escH(gameData.players[p].name)}</th>`;
+  h += `</tr><tr><td></td>`;
+  for (let p = 0; p < 8; p++) h += `<td>Pok&eacute;mon</td><td>Status</td>`;
+  h += `</tr>`;
+
+  ALL_ROUTES.forEach((r, ri) => {
+    h += `<tr><td class="route">${escH(r)}</td>`;
+    for (let p = 0; p < 8; p++) {
+      const c = getCatch(p, r);
+      h += `<td id="tc-p${p}-r${ri}" style="position:relative">`;
+      h += `<input id="inp-p${p}-r${ri}" type="text" autocomplete="off" value="${escH(c.name)}"`;
+      h += ` style="width:100%;box-sizing:border-box;border:none;background:transparent;text-align:center;color:inherit;font-size:inherit;"></td>`;
+      h += `<td id="ts-p${p}-r${ri}">`;
+      h += `<select id="sts-p${p}-r${ri}" class="statusSel">`;
+      h += statuses.map(st => `<option${st === c.status ? " selected" : ""}>${st}</option>`).join("");
+      h += `</select></td>`;
+    }
+    h += `</tr>`;
+  });
+
+  document.getElementById("app").innerHTML = h;
+
+  ALL_ROUTES.forEach((_, ri) => {
+    for (let p = 0; p < 8; p++) {
+      const el = document.getElementById(`sts-p${p}-r${ri}`);
+      if (el && el.value) applyStatusColor(el);
+    }
+  });
+
+  updateAllTeamDropdowns();
+  attachTrackerEvents();
+  applyTrackerPermissions();
+}
+
+function applyTrackerPermissions() {
+  if (!window.user || user.role === 'admin') return;
+  const mySlot = user.slot;
+  ALL_ROUTES.forEach((r, ri) => {
+    for (let p = 0; p < 8; p++) {
+      if (p === mySlot) continue;
+      const inp = document.getElementById('inp-p' + p + '-r' + ri);
+      const sel = document.getElementById('sts-p' + p + '-r' + ri);
+      if (inp) { inp.disabled = true; inp.style.cursor = 'not-allowed'; inp.style.opacity = '0.5'; }
+      if (sel) { sel.disabled = true; sel.style.cursor = 'not-allowed'; sel.style.opacity = '0.5'; }
+    }
+  });
+  for (let s = 0; s < 6; s++) {
+    for (let p = 0; p < 8; p++) {
+      if (p === mySlot) continue;
+      const ts = document.getElementById('team-p' + p + '-s' + s);
+      if (ts) { ts.disabled = true; ts.style.cursor = 'not-allowed'; ts.style.opacity = '0.5'; }
+    }
+  }
+}
+
+// ── Event-Delegation ──────────────────────────────────────────
+function attachTrackerEvents() {
+  const app     = document.getElementById("app");
+  const tracker = document.getElementById("tracker");
+
+  app.addEventListener("input", e => {
+    const m = e.target.id && e.target.id.match(/^inp-p(\d+)-r(\d+)$/);
+    if (!m) return;
+    const pIdx = +m[1], ri = +m[2];
+    if (window.user && user.role !== 'admin' && pIdx !== user.slot) return;
+    const r = ALL_ROUTES[ri];
+    if (!r) return;
+    getCatch(pIdx, r).name = e.target.value;
+    showDrop(e.target, pIdx, ri);
+    updateTeamDropdownsForPlayer(pIdx);
+    debouncedSync();
+  });
+
+  app.addEventListener("keydown", e => {
+    if (e.target.tagName !== "INPUT" || DROP.style.display === "none") return;
+    const items = DROP.querySelectorAll("div");
+    if (!items.length) return;
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      _dropIdx = Math.min(_dropIdx + 1, items.length - 1);
+      highlightDrop();
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      _dropIdx = Math.max(0, _dropIdx - 1);
+      highlightDrop();
+    } else if (e.key === "Enter" && _dropIdx >= 0) {
+      e.preventDefault();
+      commitDrop(items[_dropIdx].textContent, _dropPIdx, _dropRi);
+    }
+  });
+
+  app.addEventListener("focusin", e => {
+    const m = e.target.id && e.target.id.match(/^inp-p(\d+)-r(\d+)$/);
+    if (!m) { hideDrop(); return; }
+    if (e.target.value) showDrop(e.target, +m[1], +m[2]);
+  });
+
+  app.addEventListener("focusout", e => {
+    if (e.target.tagName === "INPUT") setTimeout(hideDrop, 150);
+  });
+
+  app.addEventListener("change", e => {
+    const ms = e.target.id && e.target.id.match(/^sts-p(\d+)-r(\d+)$/);
+    if (ms) {
+      const pIdx = +ms[1], ri = +ms[2];
+      if (window.user && user.role !== 'admin' && pIdx !== user.slot) return;
+      const r = ALL_ROUTES[ri];
+      if (!r) return;
+      getCatch(pIdx, r).status = e.target.value;
+      applyStatusColor(e.target);
+      updateTeamDropdownsForPlayer(pIdx);
+      updateOverlay();
+      syncDB();
+      return;
+    }
+    const mt = e.target.id && e.target.id.match(/^team-p(\d+)-s(\d+)$/);
+    if (mt) {
+      const pIdx = +mt[1], si = +mt[2];
+      if (window.user && user.role !== 'admin' && pIdx !== user.slot) return;
+      const gameData = gd();
+      if (gameData) gameData.players[pIdx].team[si] = e.target.value || null;
+      updateOverlay();
+      syncDB();
+    }
+  });
+
+  tracker.addEventListener("scroll", hideDrop, { passive: true });
+}
+
+// ── Tracker aus DB synchronisieren ───────────────────────────
+function syncTrackerFromDB() {
+  window._skipAnim = true;
+  const tracker = document.getElementById("tracker");
+  if (!tracker || tracker.style.display === "none") return;
+
+  const gameData = gd();
+  if (!gameData) return;
+
+  ALL_ROUTES.forEach((r, ri) => {
+    for (let p = 0; p < 8; p++) {
+      const c   = gameData.players[p].catches[r] || { name: "", status: "" };
+      const inp = document.getElementById(`inp-p${p}-r${ri}`);
+      if (inp && document.activeElement !== inp && inp.value !== c.name)
+        inp.value = c.name;
+      const sts = document.getElementById(`sts-p${p}-r${ri}`);
+      if (sts && sts.value !== c.status) {
+        sts.value = c.status;
+        applyStatusColor(sts);
+      }
+    }
+  });
+
+  updateAllTeamDropdowns();
+  window._skipAnim = false;
+}
+
+// ── Tracker öffnen / schließen ────────────────────────────────
+function toggleTracker() {
+  const t       = document.getElementById("tracker");
+  const opening = t.style.display === "none";
+  t.style.display = opening ? "block" : "none";
+  if (opening) syncTrackerFromDB();
+}
+
+document.getElementById("tracker").addEventListener("click", e => {
+  if (e.target.id === "tracker") toggleTracker();
+});
+</script>
+
+</body>
+</html>

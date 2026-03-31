@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Nuzlocke FINAL</title>
+<style>
+body { font-family:Arial; margin:20px; background:#f5f5f5; }
+.header { background:#1f4e78; color:white; padding:8px; text-align:center; }
+table { border-collapse:collapse; width:100%; }
+td,th { border:1px solid #999; padding:4px; background:#e6e6e6; text-align:center; }
+.route { text-align:left; background:#d9d9d9; }
+.alive   { background:#b6d7a8 !important; }
+.dead    { background:#ea9999 !important; }
+.blocked { background:#bfbfbf !important; }
+select { width:100%; border:none; background:transparent; }
+input { width:100%; box-sizing:border-box; border:none; background:transparent; text-align:center; font-size:inherit; }
+</style>
+</head>
+<body>
+
+<div class="header">Nuzlocke Tracker FINAL</div>
+<table id="app"></table>
+
+<script>
+const PLAYERS    = 8;
+const TEAM_SLOTS = 6;
+
+const routes = ['Acuity Lakefront','Canalave City','Celestic Town','Eterna City','Eterna Forest [Both]','Floroma Meadow','Fuego Ironworks','Great Marsh - Area 1/2','Great Marsh - Area 3/4','Great Marsh - Area 5/6','Iron Island - Inside - 1F, B1F','Iron Island - Inside - B2F , B3F','Iron Island - Outside','Lake Acuity','Lake Valor','Lake Verity','Lost Tower','Maniac Tunnel','Mt. Coronet - 2F','Mt. Coronet - 3F','Mt. Coronet - 4F','Mt. Coronet - 5F','Mt. Coronet - 6F','Mt. Coronet - 7F','Mt. Coronet - B1F','Mt. Coronet - Route 207 Entrance','Mt. Coronet - Route 211 Entrance','Mt. Coronet - Route 216 Entrance','Mt. Coronet - Snow Area','Mt. Coronet - Summit','Mt. Coronet - Tunnel to Route 211 Entrance','Old Chateau [All]','Oreburgh Gate - 1F','Oreburgh Gate - B1F','Oreburgh Mine - 1F','Oreburgh Mine - B1F','Pastoria City','Pokemon League','Ravaged Path','Resort Area','Route 201','Route 202','Route 203','Route 204 - North','Route 204 - South','Route 205 - North','Route 205 - South','Route 206','Route 207','Route 208','Route 209','Route 210 - North','Route 210 - South','Route 211 - East','Route 211 - West','Route 212 - North','Route 212 - South','Route 213','Route 214','Route 215','Route 216','Route 217','Route 218','Route 219','Route 220','Route 221','Route 222','Route 223','Route 224','Route 225','Route 226','Route 227','Route 228','Route 229','Route 230','Sendoff Spring','Snowpoint Temple','Solaceon Ruins','Stark Mountain [Entrance]','Stark Mountain [Interior]','Stark Mountain [Outside]','Sunnyshore City','Trophy Garden','Turnback Cave [1]','Turnback Cave [2]','Twinleaf Town','Valley Windworks','Valor Lakefront','Victory Road - 1F','Victory Road - 1F Back 1','Victory Road - 1F Back 2','Victory Road - 1F Back 3','Victory Road - 2F','Victory Road - B1F','Wayward Cave [Both]'];
+
+const pokemon = ['','Bisasam','Bisaknosp','Bisaflor','Glumanda','Glutexo','Glurak','Schiggy','Schillok','Turtok','Raupy','Safcon','Smettbo','Hornliu','Kokuna','Bibor','Taubsi','Tauboga','Tauboss','Rattfratz','Rattikarl','Habitak','Ibitak','Rettan','Arbok','Pikachu','Raichu','Sandan','Sandamer','Nidoran\u2640','Nidorina','Nidoqueen','Nidoran\u2642','Nidorino','Nidoking','Piepi','Pixi','Vulpix','Vulnona','Pummeluff','Knuddeluff','Zubat','Golbat','Myrapla','Duflor','Giflor','Paras','Parasek','Bluzuk','Omot','Digda','Digdri','Mauzi','Snobilikat','Enton','Entoron','Menki','Rasaff','Fukano','Arkani','Quapsel','Quaputzi','Quappo','Abra','Kadabra','Simsala','Machollo','Maschock','Machomei','Knofensa','Ultrigaria','Sarzenia','Tentacha','Tentoxa','Kleinstein','Georok','Geowaz','Ponita','Gallopa','Flegmon','Lahmus','Magnetilo','Magneton','Porenta','Dodu','Dodri','Jurob','Jugong','Sleima','Sleimok','Muschas','Austos','Nebulak','Alpollo','Gengar','Onix','Traumato','Hypno','Krabby','Kingler','Voltobal','Lektrobal','Owei','Kokowei','Tragosso','Knogga','Kicklee','Nockchan','Schlurp','Smogon','Smogmog','Rihorn','Rizeros','Chaneira','Tangela','Kangama','Seeper','Seemon','Goldini','Golking','Sterndu','Starmie','Pantimos','Sichlor','Rossana','Elektek','Magmar','Pinsir','Tauros','Karpador','Garados','Lapras','Ditto','Evoli','Aquana','Blitza','Flamara','Porygon','Amonitas','Amoroso','Kabuto','Kabutops','Aerodactyl','Relaxo','Arktos','Zapdos','Lavados','Dratini','Dragonir','Dragoran','Mewtu','Mew','Endivie','Lorblatt','Meganie','Feurigel','Igelavar','Tornupto','Karnimani','Tyracroc','Impergator','Wiesor','Wiesenior','Hoothoot','Noctuh','Ledyba','Ledian','Webarak','Ariados','Iksbat','Lampi','Lanturn','Pichu','Pii','Fluffeluff','Togepi','Togetic','Natu','Xatu','Voltilamm','Waaty','Ampharos','Blubella','Marill','Azumarill','Mogelbaum','Quaxo','Hoppspross','Hubelupf','Papungha','Griffel','Sonnkern','Sonnflora','Yanma','Felino','Morlord','Psiana','Nachtara','Kramurx','Laschoking','Traunfugil','Icognito','Woingenau','Girafarig','Tannza','Forstellka','Dummisel','Skorgla','Stahlos','Snubbull','Granbull','Baldorfish','Scherox','Pottrott','Skaraborn','Sniebel','Teddiursa','Ursaring','Schneckmag','Magcargo','Quiekel','Keifel','Corasonn','Remoraid','Octillery','Botogel','Mantax','Panzaeron','Hunduster','Hundemon','Seedraking','Phanpy','Donphan','Porygon2','Damhirplex','Farbeagle','Rabauz','Kapoera','Kussilla','Elekid','Magby','Miltank','Heiteira','Raikou','Entei','Suicune','Larvitar','Pupitar','Despotar','Lugia','Ho-Oh','Celebi','Geckarbor','Reptain','Gewaldro','Flemmli','Jungglut','Lohgock','Hydropi','Moorabbel','Sumpex','Fiffyen','Magnayen','Zigzachs','Geradaks','Waumpel','Schaloko','Papinella','Panekon','Pudox','Loturzel','Lombrero','Kappalores','Samurzel','Blanas','Tengulist','Schwalbini','Schwalboss','Wingull','Pelipper','Trasla','Kirlia','Guardevoir','Gehweiher','Maskeregen','Knilz','Kapilz','Bummelz','Muntier','Letarking','Nincada','Ninjask','Ninjatom','Flurmel','Krakeelo','Krawumms','Makuhita','Hariyama','Azurill','Nasgnet','Eneco','Enekoro','Zobiris','Flunkifer','Stollunior','Stollrak','Stolloss','Meditie','Meditalis','Frizelbliz','Voltenso','Plusle','Minun','Volbeat','Illumise','Roselia','Schluppuck','Schlukwech','Kanivanha','Tohaido','Wailmer','Wailord','Camaub','Camerupt','Qurtel','Spoink','Groink','Pandir','Knacklion','Vibrava','Libelldra','Tuska','Noktuska','Wablu','Altaria','Sengo','Vipitis','Lunastein','Sonnfel','Schmerbe','Welsar','Krebscorps','Krebutack','Puppance','Lepumentas','Liliep','Wielie','Anorith','Armaldo','Barschwa','Milotic','Formeo','Kecleon','Shuppet','Banette','Zwirrlicht','Zwirrklop','Tropius','Palimpalim','Absol','Isso','Schneppke','Firnontor','Seemops','Seejong','Walraisa','Perlu','Aalabyss','Saganabyss','Relicanth','Liebiskus','Kindwurm','Draschel','Brutalanda','Tanhel','Metang','Metagross','Regirock','Regice','Registeel','Latias','Latios','Kyogre','Groudon','Rayquaza','Jirachi','Deoxys','Chelast','Chelcarain','Chelterrar','Panflam','Panpyro','Panferno','Plinfa','Pliprin','Impoleon','Staralili','Staravia','Staraptor','Bidiza','Bidifas','Zirpurze','Zirpeise','Sheinux','Luxio','Luxtra','Knospi','Roserade','Koknodon','Rameidon','Schilterus','Bollterus','Burmy','Burmadame','Moterpel','Wadribie','Honweisel','Pachirisu','Bamelin','Bojelin','Kikugi','Kinoso','Schalellos','Gastrodon','Ambidiffel','Driftlon','Drifzepeli','Haspiror','Schlapor','Traunmagil','Kramshef','Charmian','Shnurgarst','Klingplim','Skunkapuh','Skuntank','Bronzel','Bronzong','Mobai','Pantimimi','Wonneira','Plaudagei','Kryppuk','Kaumalat','Knarksel','Knakrack','Mampfaxo','Riolu','Lucario','Hippopotas','Hippoterus','Pionskora','Piondragi','Glibunkel','Toxiquak','Venuflibis','Finneon','Lumineon','Mantirps','Shnebedeck','Rexblisar','Snibunna','Magnezone','Schlurplek','Rihornior','Tangoloss','Elevoltek','Magbrant','Togekiss','Yanmega','Folipurba','Glaziola','Skorgro','Mamutel','Porygon-Z','Galagladi','Voluminas','Zwirrfinst','Frosdedje','Rotom','Selfe','Vesprit','Tobutz','Dialga','Palkia','Heatran','Regigigas','Giratina','Cresselia','Phione','Manaphy','Darkrai','Shaymin','Arceus','Victini','Serpifeu','Efoserp','Serpiroyal','Floink','Ferkokel','Flambirex','Ottaro','Zwottronin','Admurai','Nagelotz','Kukmarda','Yorkleff','Terribark','Bissbark','Felilou','Kleoparda','Vegimak','Vegichita','Grillmak','Grillchita','Sodamak','Sodachita','Somniam','Somnivora','Dusselgurr','Navitaub','Fasasnob','Elezeba','Zebritz','Kiesling','Sedimantur','Brockoloss','Fleknoil','Fletiamo','Rotomurf','Stalobor','Ohrdoch','Praktibalk','Strepoli','Meistagrif','Schallquap','Mebrana','Branawarz','Jiutesto','Karadonis','Strawickl','Folikon','Matrifol','Toxiped','Rollum','Cerapendra','Waumboll','Elfun','Lilminip','Dressella','Barschuft','Ganovil','Rokkaiman','Rabigator','Flampion','Flampivian','Maracamba','Lithomith','Castellith','Zurrokex','Irokex','Symvolara','Makabaja','Echnatoll','Galapaflos','Karippas','Flapteryx','Aeropteryx','Unrat\u00fctox','Deponitox','Zorua','Zoroark','Picochilla','Chillabell','Mollimorba','Hypnomorba','Morbitesse','Monozyto','Mitodos','Zytomega','Piccolente','Swaroness','Gelatini','Gelatroppo','Gelatwino','Sesokitz','Kronjuwild','Emolga','Laukaps','Cavalanzas','Tarnpignon','Hutsassa','Quabbel','Apoquallyp','Mamolida','Wattzapf','Voltula','Kastadur','Tentantel','Klikk','Kliklak','Klikdiklak','Zapplardin','Zapplalek','Zapplarang','Pygraulon','Megalon','Lichtel','Laternecto','Skelabra','Milza','Sharfax','Maxax','Petznief','Siberio','Frigometri','Schnuthelm','Hydragil','Flunschlik','Lin-Fu','Wie-Shu','Shardrago','Golbit','Golgantes','Gladiantri','Caesurio','Bisofank','Geronimatz','Washakwil','Skallyk','Grypheldis','Furnifra\u00df','Fermicula','Kapuno','Duodino','Trikephalo','Ignivor','Ramoth','Kobalium','Terrakium','Viridium','Boreos','Voltolos','Reshiram','Zekrom','Demeteros','Kyurem','Keldeo','Meloetta','Genesect'];
+
+const statuses = ["","Lebendig","Tot","Blockiert"];
+
+function statHtml() {
+  return `<select class="statusSel">${statuses.map(s=>`<option>${s}</option>`).join("")}</select>`;
+}
+
+function applyStatusColor(el) {
+  const tdS = el.parentElement;
+  const tdP = tdS ? tdS.previousElementSibling : null;
+  ["alive","dead","blocked"].forEach(c => {
+    tdS.classList.remove(c);
+    if (tdP) tdP.classList.remove(c);
+  });
+  if (el.value === "Lebendig") { tdS.classList.add("alive");   if (tdP) tdP.classList.add("alive"); }
+  if (el.value === "Tot")      { tdS.classList.add("dead");    if (tdP) tdP.classList.add("dead"); }
+  if (el.value === "Blockiert"){ tdS.classList.add("blocked"); if (tdP) tdP.classList.add("blocked"); }
+}
+
+(function buildTable() {
+  let h = "";
+
+  h += `<tr><th></th>`;
+  for (let p = 1; p <= PLAYERS; p++) h += `<th colspan=2>Spieler ${p}</th>`;
+  h += `</tr><tr><td></td>`;
+  for (let p = 1; p <= PLAYERS; p++) h += `<td>Pok&eacute;mon</td><td>Status</td>`;
+  h += `</tr>`;
+
+  for (let s = 1; s <= TEAM_SLOTS; s++) {
+    h += `<tr class="teamRow"><td class="route">Team Slot ${s}</td>`;
+    for (let p = 1; p <= PLAYERS; p++) {
+      h += `<td><select class="teamSel" style="width:100%"><option value=""></option></select></td>`;
+      h += `<td>${statHtml()}</td>`;
+    }
+    h += `</tr>`;
+  }
+
+  h += `<tr><th>Route</th>`;
+  for (let p = 1; p <= PLAYERS; p++) h += `<th colspan=2>Spieler ${p}</th>`;
+  h += `</tr><tr><td></td>`;
+  for (let p = 1; p <= PLAYERS; p++) h += `<td>Pok&eacute;mon</td><td>Status</td>`;
+  h += `</tr>`;
+
+  routes.forEach(r => {
+    h += `<tr><td class="route">${r}</td>`;
+    for (let p = 1; p <= PLAYERS; p++) {
+      h += `<td><select class="pokeSel">${pokemon.map(n=>`<option>${n}</option>`).join("")}</select></td>`;
+      h += `<td>${statHtml()}</td>`;
+    }
+    h += `</tr>`;
+  });
+
+  for (let i = 1; i <= 8; i++) {
+    h += `<tr><td class="route">Statik ${i}</td>`;
+    for (let p = 1; p <= PLAYERS; p++) {
+      h += `<td><select class="pokeSel">${pokemon.map(n=>`<option>${n}</option>`).join("")}</select></td>`;
+      h += `<td>${statHtml()}</td>`;
+    }
+    h += `</tr>`;
+  }
+
+  document.getElementById("app").innerHTML = h;
+})();
+
+(function convertInputs() {
+  document.querySelectorAll("#app tr:not(.teamRow) td").forEach(td => {
+    if (td.cellIndex % 2 !== 1) return;
+    const select = td.querySelector("select.pokeSel");
+    if (!select) return;
+
+    let activeIndex = -1;
+
+    const input = document.createElement("input");
+    input.type = "text";
+    input.autocomplete = "off";
+    input.style.cssText = "width:100%;box-sizing:border-box;border:none;background:transparent;text-align:center;font-size:inherit;";
+
+    const drop = document.createElement("div");
+    drop.style.cssText = "position:absolute;top:100%;left:0;right:0;background:white;border:1px solid #999;max-height:120px;overflow-y:auto;display:none;z-index:999;";
+
+    function updateActive() {
+      drop.querySelectorAll("div").forEach((el, i) => {
+        el.style.background = (i === activeIndex) ? "#3399ff" : "";
+        el.style.color      = (i === activeIndex) ? "white"   : "";
+      });
+    }
+
+    function selectItem(name) {
+      input.value = name;
+      drop.style.display = "none";
+      activeIndex = -1;
+      updateTeam();
+      sendToOverlay();
+    }
+
+    input.addEventListener("input", () => {
+      const val = input.value.toLowerCase();
+      drop.innerHTML = "";
+      activeIndex = -1;
+      if (!val) { drop.style.display = "none"; updateTeam(); sendToOverlay(); return; }
+
+      let count = 0;
+      for (const name of pokemon) {
+        if (!name.toLowerCase().startsWith(val)) continue;
+        const item = document.createElement("div");
+        item.textContent = name;
+        item.style.cssText = "padding:4px 6px;cursor:pointer;";
+        item.addEventListener("mousedown", e => { e.preventDefault(); selectItem(name); });
+        drop.appendChild(item);
+        if (++count >= 10) break;
+      }
+      drop.style.display = count ? "block" : "none";
+      updateTeam();
+      sendToOverlay();
+    });
+
+    input.addEventListener("keydown", e => {
+      const items = drop.querySelectorAll("div");
+      if (!items.length || drop.style.display === "none") return;
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        activeIndex = Math.min(activeIndex + 1, items.length - 1);
+        updateActive();
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        activeIndex = Math.max(0, activeIndex - 1);
+        updateActive();
+      } else if (e.key === "Enter" && activeIndex >= 0) {
+        e.preventDefault();
+        selectItem(items[activeIndex].textContent);
+      }
+    });
+
+    input.addEventListener("blur", () => {
+      setTimeout(() => { drop.style.display = "none"; }, 150);
+      updateTeam();
+      sendToOverlay();
+    });
+
+    td.style.position = "relative";
+    td.innerHTML = "";
+    td.appendChild(input);
+    td.appendChild(drop);
+  });
+})();
+
+function updateTeam() {
+  const alive = Array.from({ length: PLAYERS }, () => []);
+
+  document.querySelectorAll("#app tr:not(.teamRow)").forEach(row => {
+    const cells = row.querySelectorAll("td");
+    for (let p = 0; p < PLAYERS; p++) {
+      const pokeCell   = cells[1 + p * 2];
+      const statusCell = cells[2 + p * 2];
+      if (!pokeCell || !statusCell) continue;
+      const input  = pokeCell.querySelector("input");
+      const name   = input ? input.value.trim() : "";
+      const status = statusCell.querySelector("select")?.value || "";
+      if (name && status === "Lebendig" && !alive[p].includes(name)) {
+        alive[p].push(name);
+      }
+    }
+  });
+
+  document.querySelectorAll("#app tr.teamRow").forEach(row => {
+    const cells = row.querySelectorAll("td");
+    for (let p = 0; p < PLAYERS; p++) {
+      const cell = cells[1 + p * 2];
+      if (!cell) continue;
+      const sel = cell.querySelector("select.teamSel");
+      if (!sel) continue;
+      const cur = sel.value;
+      sel.innerHTML = `<option value=""></option>${alive[p].map(n=>`<option>${n}</option>`).join("")}`;
+      sel.value = alive[p].includes(cur) ? cur : "";
+    }
+  });
+}
+
+function sendToOverlay() {
+  const data = {};
+
+  document.querySelectorAll("#app tr.teamRow").forEach(row => {
+    const match = row.querySelector("td.route")?.textContent.match(/\d+/);
+    if (!match) return;
+    const slot  = parseInt(match[0]);
+    const cells = row.querySelectorAll("td");
+
+    for (let p = 0; p < PLAYERS; p++) {
+      const pokeCell   = cells[1 + p * 2];
+      const statusCell = cells[2 + p * 2];
+      if (!pokeCell || !statusCell) continue;
+      const name   = pokeCell.querySelector("select.teamSel")?.value || "";
+      const status = statusCell.querySelector("select.statusSel")?.value || "";
+      if (!data[p + 1]) data[p + 1] = [];
+      const idx = (name && status === "Lebendig") ? pokemon.indexOf(name) : 0;
+      data[p + 1][slot - 1] = (idx > 0) ? idx : 0;
+    }
+  });
+
+  window.parent.postMessage({ type: "TEAM_UPDATE", payload: data }, "*");
+}
+
+document.getElementById("app").addEventListener("change", (e) => {
+  if (e.target.classList.contains("statusSel")) {
+    applyStatusColor(e.target);
+  }
+  updateTeam();
+  sendToOverlay();
+});
+</script>
+
+</body>
+</html>
