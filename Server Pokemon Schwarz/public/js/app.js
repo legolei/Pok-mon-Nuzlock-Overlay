@@ -18,7 +18,7 @@ const GAME_CONFIG = {
   },
   "Schwarz 2": {
     badges: { type:"sprite", src:"/assets/badges/unova2/badges.png" },
-    levelCaps: ["11/13","13/18","18/24","24/27","27/31","31/35","35/39","39/43"]
+    levelCaps: ["11/13","15/18","21/24","25/27","29/31","33/35","37/39","41/44","48/52"]
   },
   // Alle anderen Editionen: Einzelbilder
   "Soul Silver": {
@@ -32,7 +32,7 @@ const GAME_CONFIG = {
       "/assets/badges/johto/Eisorden.png",
       "/assets/badges/johto/Drachenorden.png"
     ]},
-    levelCaps: ["11/13","13/17","17/19","19/25","25/31","31/35","35/41","41/45"]
+    levelCaps: ["11/13","15/17","17/19","21/25","28/31","33/35","38/41","47/50","51/55"]
   },
   "Platin": {
     badges: { type:"individual", files:[
@@ -45,7 +45,7 @@ const GAME_CONFIG = {
       "/assets/badges/sinnoh/220px-Firnorden.png",
       "/assets/badges/sinnoh/220px-Lichtorden.png"
     ]},
-    levelCaps: ["12/14","14/22","22/26","26/30","30/37","37/39","39/44","44/49"]
+    levelCaps: ["12/14","17/22","23/26","28/30","35/37","38/40","42/46","48/50","52/55"]
   },
   "Feuer Rot": {
     badges: { type:"individual", files:[
@@ -58,7 +58,7 @@ const GAME_CONFIG = {
       "/assets/badges/kanto/155px-Vulkanorden.png",
       "/assets/badges/kanto/155px-Erdorden.png"
     ]},
-    levelCaps: ["12/14","14/21","21/24","24/29","29/43","43/43","43/47","47/50"]
+    levelCaps: ["12/14","17/21","23/24","26/29","38/43","45/45","46/48","48/52","55/58"]
   },
   "Pokemon X": {
     badges: { type:"individual", files:[
@@ -71,7 +71,7 @@ const GAME_CONFIG = {
       "/assets/badges/kalos/Eisbergorden.png",
       "/assets/badges/kalos/Ampere-Orden.png"
     ]},
-    levelCaps: ["10/12","12/25","25/32","32/34","34/37","37/42","42/45","45/48"]
+    levelCaps: ["10/12","21/25","28/32","33/34","35/37","39/42","43/45","48/50","52/55"]
   },
   "Pokemon Alpha Saphir": {
     badges: { type:"individual", files:[
@@ -84,7 +84,7 @@ const GAME_CONFIG = {
       "/assets/badges/hoenn/Mentalorden.png",
       "/assets/badges/hoenn/Schauerorden.png"
     ]},
-    levelCaps: ["13/15","15/18","18/24","24/28","28/31","31/33","33/42","42/46"]
+    levelCaps: ["13/15","16/18","21/24","25/28","29/31","32/35","38/42","44/46","48/52"]
   }
 };
 
