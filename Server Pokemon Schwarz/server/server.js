@@ -30,12 +30,14 @@ global.saveTimeout = null;
 
 // ── GitHub persistence config ────────────────────────────────────────────────
 const GH_OWNER  = "legolei";
-const GH_REPO   = "nuzlocke-data";
-const GH_FILE   = "db.json";
+const GH_REPO   = "Nuzlock-Speicher";
+const GH_FILE   = "storage.json";
 const GH_BRANCH = "main";
 
 function ghToken() {
-  return process.env.GITHUB_TOKEN || "";
+  const token = process.env.GITHUB_TOKEN || "";
+  if (!token) console.error("[db] WARNING: GITHUB_TOKEN is not set — saves will fail!");
+  return token;
 }
 
 function ghApiRequest(method, urlPath, body) {
@@ -105,6 +107,12 @@ async function loadFromGitHub() {
     });
 
     const def = defaultDB();
+    // Neues Format (db.games) direkt übernehmen
+    if (data && typeof data.games === "object" && data.games !== null) {
+      console.log("[db] loaded from GitHub (new format), game:", data.game || "(none)");
+      return data;
+    }
+    // Altes Format migrieren
     const merged = Object.assign({}, def, data);
     if (!Array.isArray(merged.players) || merged.players.length !== 8) {
       merged.players = def.players;
@@ -116,7 +124,7 @@ async function loadFromGitHub() {
     if (!Array.isArray(merged.graveyard)) merged.graveyard = [];
     if (typeof merged.game !== "string") merged.game = "";
 
-    console.log("[db] loaded from GitHub, game:", merged.game || "(none)");
+    console.log("[db] loaded from GitHub (legacy format), game:", merged.game || "(none)");
     return merged;
   } catch (err) {
     console.warn("[db] GitHub load failed:", err.message, "— using default DB");
@@ -175,11 +183,11 @@ io.on("connection", (socket) => {
     // Live Updates sofort an andere Clients senden (ohne den Sender doppelt zu triggern)
     socket.broadcast.emit("state", db);
 
-    // GitHub speichern maximal alle 60 Sekunden (verhindert Spam)
+    // GitHub speichern maximal alle 10 Sekunden (verhindert Spam)
     clearTimeout(global.saveTimeout);
     global.saveTimeout = setTimeout(() => {
       saveToGitHub(db);
-    }, 60000);
+    }, 10000);
   });
 
   socket.on("disconnect", () => {
