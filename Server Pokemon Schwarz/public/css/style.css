@@ -1,65 +1,76 @@
-/* ── Reset & Base ─────────────────────────────────────────────── */
-*, *::before, *::after {
-  box-sizing: border-box;
-}
+/* ── Reset ─────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html {
+html, body {
   width: 100%;
-  height: 100%;
-  font-size: 16px;
+  min-height: 100vh;
+  font-family: Arial, sans-serif;
+  color: white;
+  overflow-x: hidden;
 }
 
 body {
-  background: url('/assets/background.jpg') center center / cover no-repeat fixed;
-  font-family: Arial, sans-serif;
-  color: white;
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100%;
-  overflow-x: hidden;
-  min-height: 100vh;
+  background: url('/assets/background.jpg') center / cover no-repeat fixed;
 }
 
-/* ── Login ────────────────────────────────────────────────────── */
+/* ── Login ──────────────────────────────────────────────────────── */
 #login {
-  position: absolute;
+  position: fixed;
   top: 40%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: rgba(0, 0, 0, 0.8);
-  padding: 1.25rem;
+  background: rgba(0,0,0,0.85);
+  padding: 1.5rem;
   border-radius: 10px;
   width: min(320px, 90vw);
+  text-align: center;
+}
+#login h2 { margin-bottom: 1rem; }
+#login input {
+  display: block;
+  width: 100%;
+  margin-bottom: 0.75rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 4px;
+  border: 1px solid #555;
+  background: #222;
+  color: white;
+  font-size: 1rem;
+}
+#login button {
+  padding: 0.5rem 1.5rem;
+  cursor: pointer;
+  border-radius: 4px;
+  border: none;
+  background: #1f4e78;
+  color: white;
+  font-size: 1rem;
 }
 
-/* ── Overlay Grid ─────────────────────────────────────────────── */
+/* ── Overlay Grid ───────────────────────────────────────────────── */
 #overlay {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  grid-auto-rows: 1fr;
-  gap: clamp(4px, 1vw, 10px);
-  padding: clamp(4px, 1vw, 10px);
+  gap: clamp(4px, 0.8vw, 10px);
+  padding: clamp(4px, 0.8vw, 10px);
   width: 100%;
-  height: 100vh;
+  /* kein height:100vh – wächst mit Inhalt */
 }
 
-/* ── Player Card ──────────────────────────────────────────────── */
+/* ── Player Card ─────────────────────────────────────────────────── */
 .player {
-  background: rgba(0, 0, 0, 0.75);
-  padding: clamp(4px, 0.8vw, 8px);
+  background: rgba(0,0,0,0.75);
   border-radius: 6px;
-  min-width: 0;
-  overflow: hidden;
+  padding: clamp(4px, 0.6vw, 8px);
   display: flex;
   flex-direction: column;
-  height: 100%;
-  min-height: 0;
+  gap: 4px;
+  min-width: 0;
+  overflow: hidden;
 }
 
-/* ── Spielername ──────────────────────────────────────────────── */
+/* ── Spielername ─────────────────────────────────────────────────── */
 .player-name {
-  margin: 0 0 4px 0;
   font-size: clamp(9px, 1vw, 13px);
   text-align: center;
   white-space: nowrap;
@@ -71,60 +82,7 @@ body {
 .player-name.editable { cursor: pointer; }
 .player-name.editable:hover { text-decoration: underline; }
 
-/* ── Stream-Zeile: Sidebar | Screen ──────────────────────────── */
-.player-stream-row {
-  display: flex;
-  gap: 4px;
-  align-items: stretch;
-  margin-top: 4px;
-  flex: 1;
-  min-height: 0;
-}
-
-/* ── Sidebar ──────────────────────────────────────────────────── */
-.pokemon-sidebar {
-  flex: 0 0 clamp(60px, 8vw, 83px);
-  width: clamp(60px, 8vw, 83px);
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  min-height: 0;
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 4px;
-}
-
-/* Scrollbare Pokémon-Liste */
-.pokemon-list {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 2px;
-  padding: 2px;
-  overflow-y: auto;
-  flex: 1;
-  min-height: 0;
-  scrollbar-width: none;
-  align-content: start;
-}
-.pokemon-list::-webkit-scrollbar { display: none; }
-
-.pokemon-list img {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  object-fit: contain;
-  image-rendering: pixelated;
-  display: block;
-}
-
-/* ── Stream-Spalte ────────────────────────────────────────────── */
-.stream-col {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-}
-
-/* ── Screens ──────────────────────────────────────────────────── */
+/* ── Screens ─────────────────────────────────────────────────────── */
 .mainScreen {
   width: 100%;
   aspect-ratio: 16 / 9;
@@ -142,7 +100,6 @@ body {
   width: 100%;
   aspect-ratio: 16 / 9;
   background: black;
-  margin-top: 3px;
   overflow: hidden;
   position: relative;
   flex-shrink: 0;
@@ -154,36 +111,53 @@ body {
   pointer-events: none;
 }
 
-/* ── Graveyard ────────────────────────────────────────────────── */
-#graveyard {
-  display: flex;
-  gap: 10px;
-  padding: 20px;
-  flex-wrap: wrap;
-}
-#graveyard img {
-  width: 50px;
-  height: auto;
-  display: block;
-}
-.grave {
-  border: 3px solid;
-  padding: 4px;
-  cursor: pointer;
+/* ── Pokémon Box ─────────────────────────────────────────────────── */
+.pokemon-box-label {
+  font-size: clamp(7px, 0.7vw, 10px);
+  color: #aaa;
+  text-align: left;
+  flex-shrink: 0;
+  line-height: 1;
 }
 
-/* ── Badges (Sprite-Sheet — Schwarz/Schwarz 2) ───────────────── */
+.pokemon-box {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(clamp(28px, 3vw, 40px), 1fr));
+  grid-auto-rows: clamp(28px, 3vw, 40px);
+  grid-auto-flow: row;
+  gap: 2px;
+  height: calc(3 * clamp(28px, 3vw, 40px) + 2 * 2px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: #444 transparent;
+  flex-shrink: 0;
+  align-content: start;
+}
+.pokemon-box::-webkit-scrollbar { width: 4px; }
+.pokemon-box::-webkit-scrollbar-track { background: transparent; }
+.pokemon-box::-webkit-scrollbar-thumb { background: #444; border-radius: 2px; }
+
+/* Box-Sprite: sekundär, kleiner */
+.pokemon-box img, .box-sprite {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+  display: block;
+}
+
+/* ── Badges ──────────────────────────────────────────────────────── */
 .badges {
   display: flex;
-  gap: clamp(2px, 0.3vw, 3px);
-  margin-top: 5px;
   flex-wrap: wrap;
+  gap: clamp(1px, 0.3vw, 3px);
   flex-shrink: 0;
 }
 
 .badge {
-  width: clamp(20px, 2.5vw, 28px);
-  height: clamp(20px, 2.5vw, 28px);
+  width: clamp(18px, 2.2vw, 28px);
+  height: clamp(18px, 2.2vw, 28px);
   background-repeat: no-repeat;
   filter: grayscale(100%);
   cursor: pointer;
@@ -194,10 +168,9 @@ body {
 .badge.active { filter: none; }
 .badge:active { transform: none !important; }
 
-/* ── Badges (Einzelbilder) ───────────────────────────────────── */
 .badge-img {
-  width: clamp(20px, 2.5vw, 28px);
-  height: clamp(20px, 2.5vw, 28px);
+  width: clamp(18px, 2.2vw, 28px);
+  height: clamp(18px, 2.2vw, 28px);
   cursor: pointer;
   flex-shrink: 0;
   display: flex;
@@ -213,18 +186,18 @@ body {
 }
 .badge-img.active img { filter: none; }
 
-/* ── Team-Slots ───────────────────────────────────────────────── */
+/* ── Team ────────────────────────────────────────────────────────── */
 .team {
   display: flex;
-  gap: 2px;
-  margin-top: 5px;
   flex-wrap: wrap;
+  gap: 3px;
   flex-shrink: 0;
 }
 
+/* Team-Slot: primär, größer */
 .slot {
-  width: clamp(28px, 4vw, 42px);
-  height: clamp(28px, 4vw, 42px);
+  width: clamp(42px, 5vw, 64px);
+  height: clamp(42px, 5vw, 64px);
   background: #333;
   display: flex;
   align-items: center;
@@ -234,24 +207,71 @@ body {
   cursor: pointer;
   flex-shrink: 0;
 }
-.slot img {
+.slot img, .team-sprite {
   width: 100%;
   height: 100%;
   object-fit: contain;
   image-rendering: pixelated;
-  z-index: 1;
 }
 .slot:hover { outline: 2px solid white; z-index: 2; }
 
-/* ── Dead-Filter ──────────────────────────────────────────────── */
+/* ── Level Cap & Deaths ──────────────────────────────────────────── */
+.level-cap-label {
+  font-size: clamp(10px, 1rem, 1.1rem);
+  text-align: center;
+  flex-shrink: 0;
+}
+.deaths-label {
+  font-size: clamp(8px, 0.9vw, 12px);
+  flex-shrink: 0;
+}
+
+/* ── Dead filter ─────────────────────────────────────────────────── */
 .dead {
   filter: grayscale(100%) brightness(0.5) sepia(1) hue-rotate(-50deg);
 }
 
-/* ── Misc UI ──────────────────────────────────────────────────── */
-#adjContextMenu div:hover { background: #2a2a2a; }
-#fsTouch { border-top: 2px solid #333; }
+/* ── Graveyard ───────────────────────────────────────────────────── */
+#graveyard-section { padding: 10px; }
+#graveyard {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  flex-wrap: wrap;
+}
+#graveyard img { width: 50px; height: auto; display: block; }
+.grave { border: 3px solid; padding: 4px; cursor: pointer; }
 
+/* ── Stream-Internals ────────────────────────────────────────────── */
+.mainScreen iframe,
+.touchScreen iframe {
+  position: absolute;
+  top: 0; left: 0;
+  width: 1280px; height: 720px;
+  border: none;
+  pointer-events: none;
+}
+.mainScreen video,
+.touchScreen video {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border: none;
+  pointer-events: none;
+}
+.viewport {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  overflow: hidden;
+}
+.content {
+  position: absolute;
+  top: 0; left: 0;
+  transform-origin: top left;
+}
 .streamCapture {
   position: absolute;
   inset: 0;
@@ -262,39 +282,10 @@ body {
 }
 .streamCapture:active { cursor: grabbing; }
 
-.mainScreen iframe,
-.touchScreen iframe {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 1280px;
-  height: 720px;
-  border: none;
-  pointer-events: none;
-}
-
-.viewport {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-}
-
-.content {
-  position: absolute;
-  top: 0;
-  left: 0;
-  transform-origin: top left;
-}
-
 #adjDragLayer {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
   z-index: 100;
   pointer-events: auto;
   cursor: grab;
@@ -302,51 +293,18 @@ body {
 }
 #adjDragLayer:active { cursor: grabbing; }
 
-/* ── Fire Red: nur 1 Screen ───────────────────────────────────── */
+#adjContextMenu div:hover { background: #2a2a2a; }
+#fsTouch { border-top: 2px solid #333; }
+
+/* ── Fire Red: nur 1 Screen ──────────────────────────────────────── */
 body.fire-red .touchScreen { display: none !important; }
 
-/* ── Breakpoints ──────────────────────────────────────────────── */
-
-/* Tablet: 2 Spalten */
-@media (max-width: 900px) {
-  #overlay {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    height: auto;
-    min-height: 100vh;
-  }
-
-  .pokemon-sidebar {
-    flex: 0 0 56px;
-    width: 56px;
-  }
+/* ── Breakpoints ─────────────────────────────────────────────────── */
+@media (max-width: 1100px) {
+  #overlay { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
-/* Mobile: 1 Spalte */
-@media (max-width: 480px) {
-  #overlay {
-    grid-template-columns: 1fr;
-    height: auto;
-  }
-
-  .player-stream-row {
-    flex-direction: column;
-  }
-
-  .pokemon-sidebar {
-    flex: none;
-    width: 100%;
-    flex-direction: row;
-    height: 56px;
-  }
-
-  .pokemon-list {
-    grid-template-columns: repeat(auto-fill, 28px);
-    grid-auto-rows: 28px;
-    overflow-x: auto;
-    overflow-y: hidden;
-  }
-
-  .badges, .team {
-    justify-content: center;
-  }
+@media (max-width: 580px) {
+  #overlay { grid-template-columns: 1fr; }
+  .badges, .team { justify-content: center; }
 }
