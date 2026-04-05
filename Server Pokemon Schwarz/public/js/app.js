@@ -338,13 +338,14 @@ socket.on("state", (state) => {
 });
 
 // ── Sidebar: lebende Pokémon die NICHT im Team sind ──────────
-function sidebarIconsHTML(p) {
+function pokemonBoxHTML(p) {
   if (!p || !p.catches) return '';
   const teamSet = new Set((p.team || []).filter(Boolean));
   const seen = new Set();
   let html = '';
   const validRoutes = new Set(ALL_ROUTES);
-  for (const [route, c] of Object.entries(p.catches)) {
+  for (const route of ALL_ROUTES) {
+    const c = p.catches[route];
     if (!validRoutes.has(route)) continue;
     if (!c || !c.name || c.status !== 'Lebendig') continue;
     if (teamSet.has(c.name) || seen.has(c.name)) continue;
@@ -354,10 +355,10 @@ function sidebarIconsHTML(p) {
     const url = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/${idx}.gif`;
     html += `<img src="${url}" title="${c.name}">`;
   }
-  return `<div class="pokemon-list">${html}</div>`;
+  return html;
 }
 
-// ── Player HTML (neues Layout: Screen full-width, Sidebar overlay) ────
+// ── Player HTML (vertikales Layout) ──────────────────────────────────
 function playerHTML(p, i) {
   const badgeCount = p.badges.filter(b => b).length;
   const caps       = getLevelCapsForGame();
@@ -365,29 +366,22 @@ function playerHTML(p, i) {
   const canEdit    = (user.role === "admin" || user.slot === i) ? "editable" : "";
   return `
 <h3 id="pname-${i}" class="player-name ${canEdit}" onclick="editPlayerName(${i})">${p.name}</h3>
-<div class="player-stream-row">
-  <div class="pokemon-sidebar" id="psidebar-${i}">${sidebarIconsHTML(p)}</div>
-  <div class="stream-col">
-    <div class="mainScreen" id="pmain-${i}" onclick="openCropEditor(${i})">
-      ${p.mainStream
-        ? `<div class="viewport" id="mvp-${i}"><div class="content" id="mct-${i}"><iframe src="${p.mainStream}" id="mif-${i}" frameborder="0" allow="autoplay; fullscreen" muted></iframe></div></div><div class="streamCapture"></div>`
-        : '<span class="stream-placeholder">Click to add stream</span>'}
-    </div>
-    <div class="touchScreen" id="ptouch-${i}">
-      ${p.touchStream
-        ? `<div class="viewport" id="tvp-${i}"><div class="content" id="tct-${i}"><iframe src="${p.touchStream}" id="tif-${i}" frameborder="0" allow="autoplay; fullscreen" muted></iframe></div></div><div class="streamCapture"></div>`
-        : ''}
-    </div>
-  </div>
+<div class="mainScreen" id="pmain-${i}" onclick="openCropEditor(${i})">
+  ${p.mainStream
+    ? `<div class="viewport" id="mvp-${i}"><div class="content" id="mct-${i}"><iframe src="${p.mainStream}" id="mif-${i}" frameborder="0" allow="autoplay; fullscreen" muted></iframe></div></div><div class="streamCapture"></div>`
+    : '<span class="stream-placeholder">Click to add stream</span>'}
 </div>
-<div class="badges" id="pbadges-${i}">
-  ${badgesHTML(p.badges, i)}
+<div class="touchScreen" id="ptouch-${i}">
+  ${p.touchStream
+    ? `<div class="viewport" id="tvp-${i}"><div class="content" id="tct-${i}"><iframe src="${p.touchStream}" id="tif-${i}" frameborder="0" allow="autoplay; fullscreen" muted></iframe></div></div><div class="streamCapture"></div>`
+    : ''}
 </div>
-<div class="team" id="pteam-${i}">
-  ${teamHTML(p, i)}
-</div>
-<div id="plc-${i}" style="margin-top:6px;font-size:12px;text-align:center;">Level Cap: ${levelcap}</div>
-<div id="pdeaths-${i}">&#x26B0; ${p.deaths}</div>`;
+<div class="pokemon-box-label">Pokémon Box</div>
+<div class="pokemon-box" id="pbox-${i}">${pokemonBoxHTML(p)}</div>
+<div class="badges" id="pbadges-${i}">${badgesHTML(p.badges, i)}</div>
+<div class="team" id="pteam-${i}">${teamHTML(p, i)}</div>
+<div id="plc-${i}" class="level-cap-label">Level Cap: ${levelcap}</div>
+<div id="pdeaths-${i}" class="deaths-label">&#x26B0; ${p.deaths}</div>`;
 }
 
 function teamHTML(p, i) {
@@ -456,8 +450,8 @@ function updateOverlay() {
     const teamEl = document.getElementById(`pteam-${i}`);
     if (teamEl) teamEl.innerHTML = teamHTML(p, i);
 
-    const sidebarEl = document.getElementById(`psidebar-${i}`);
-    if (sidebarEl) sidebarEl.innerHTML = sidebarIconsHTML(p);
+    const boxEl = document.getElementById(`pbox-${i}`);
+    if (boxEl) boxEl.innerHTML = pokemonBoxHTML(p);
 
     const deathsEl = document.getElementById(`pdeaths-${i}`);
     if (deathsEl) deathsEl.textContent = "\u26B0 " + p.deaths;
