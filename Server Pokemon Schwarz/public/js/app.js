@@ -60,6 +60,19 @@ const GAME_CONFIG = {
     ]},
     levelCaps: ["12/14","17/22","23/26","28/30","35/37","38/40","42/46","48/50","52/55"]
   },
+  "Bloody Platin": {
+    badges: { type:"individual", files:[
+      "/assets/badges/sinnoh/130px-Kohleorden.png",
+      "/assets/badges/sinnoh/130px-Waldorden.png",
+      "/assets/badges/sinnoh/220px-Reliktorden.png",
+      "/assets/badges/sinnoh/220px-Minenorden.png",
+      "/assets/badges/sinnoh/220px-Fennorden.png",
+      "/assets/badges/sinnoh/130px-Bergorden.png",
+      "/assets/badges/sinnoh/220px-Firnorden.png",
+      "/assets/badges/sinnoh/220px-Lichtorden.png"
+    ]},
+    levelCaps: ["14/16","24/26","32/34","40/42","48/50","56/58","64/66","72/75","80/83"]
+  },
   "Feuer Rot": {
     badges: { type:"individual", files:[
       "/assets/badges/kanto/155px-Felsorden.png",
